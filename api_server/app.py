@@ -31,9 +31,10 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 from counterfactual_explainer import CounterfactualExplainer, create_counterfactual_visualizations
-
+from flask_cors import cross_origin
 
 app = Flask(__name__)
+
 CORS(app, resources={
     r"/*": {
         "origins": ["https://dtu-1.onrender.com", "http://dtu-1.onrender.com"],
@@ -41,6 +42,20 @@ CORS(app, resources={
         "allow_headers": ["Content-Type", "Authorization"]
     }
 })
+
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "https://dtu-1.onrender.com")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE")
+    return response
+
+@app.route("/<path:path>", methods=["OPTIONS"])
+@cross_origin()
+def options_handler(path):
+    return jsonify({"status": "ok"}), 200
+
+
 
 
 
@@ -69,12 +84,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # ImageNet normalization
 ])
-@app.after_request
-def add_cors_headers(response):
-    response.headers.add("Access-Control-Allow-Origin", "https://dtu-1.onrender.com")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-    return response
+
 
 def load_model():
     global model, shap_explainer, counterfactual_explainer
