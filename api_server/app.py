@@ -33,26 +33,12 @@ matplotlib.use('Agg')  # Use non-interactive backend
 from counterfactual_explainer import CounterfactualExplainer, create_counterfactual_visualizations
 from flask_cors import cross_origin
 
-app = Flask(__name__)
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
-CORS(app, resources={r"/*": {"origins": "*"}})
-
-@app.after_request
-def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE")
-    return response
-
-@app.route("/health", methods=["GET", "OPTIONS"])
-@cross_origin()  # also responds properly to preflight
-def health():
-    return jsonify({"status": "ok"}), 200
-
-
+app = Flask(__name__)
+CORS(app)
 
 
 
