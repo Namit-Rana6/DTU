@@ -35,6 +35,11 @@ from flask_cors import cross_origin
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
+
+print("[DEBUG] Current working directory:", os.getcwd())
+print("[DEBUG] Files in working directory:", os.listdir('.'))
+
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
