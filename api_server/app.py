@@ -210,7 +210,10 @@ def generate_shap_explanation(input_tensor, predicted_class=None):
     except Exception as e:
         print(f"SHAP explanation generation failed: {str(e)}")
         return None, None
-
+@app.route('/')
+def home():
+    return "🚀 API is live! Use /model-info or /predict"
+    
 @app.route('/health', methods=['GET'])
 def health_check():
     """Health check endpoint"""
