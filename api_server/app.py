@@ -36,7 +36,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
 @app.after_request
 def after_request(response):
@@ -45,22 +45,21 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
     return response
 
-@app.route('/health', methods=['GET'])
+# Health endpoint
+@app.route('/health', methods=['GET', 'OPTIONS'])
 def health():
-    return jsonify({"status": "ok"})
+    return jsonify({"status": "ok"}), 200
 
 # Define MODEL_CONFIG first
 MODEL_CONFIG = {
     'num_classes': 2,
     'class_names': ['normal', 'fracture'],
     'input_size': 224,
-    'model_path': 'best.pth'  # placeholder, will be overwritten below
+    'model_path': 'best.pth'  # model in same directory as app.py
 }
 
-# Dynamically set absolute model path (handles deployment correctly)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_CONFIG['model_path'] = os.path.join(BASE_DIR, '..', 'best.pth')
-MODEL_CONFIG['model_path'] = os.path.abspath(MODEL_CONFIG['model_path'])
+MODEL_CONFIG['model_path'] = os.path.join(BASE_DIR, 'best.pth')
 
 print(f"[INFO] Looking for model at: {MODEL_CONFIG['model_path']}")
 
