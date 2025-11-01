@@ -35,24 +35,21 @@ from flask_cors import cross_origin
 
 app = Flask(__name__)
 
-CORS(app, resources={
-    r"/*": {
-        "origins": ["https://dtu-1.onrender.com", "http://dtu-1.onrender.com"],
-        "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type", "Authorization"]
-    }
-})
+from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
+
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
 def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "https://dtu-1.onrender.com")
+    response.headers.add("Access-Control-Allow-Origin", "*")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE")
     return response
 
-@app.route("/<path:path>", methods=["OPTIONS"])
-@cross_origin()
-def options_handler(path):
+@app.route("/health", methods=["GET", "OPTIONS"])
+@cross_origin()  # also responds properly to preflight
+def health():
     return jsonify({"status": "ok"}), 200
 
 
