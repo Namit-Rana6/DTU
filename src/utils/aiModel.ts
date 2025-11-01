@@ -3,8 +3,9 @@ import { performDetailedAnalysis, checkGeminiAvailability } from './geminiServic
 import { DetailedAnalysisResult } from '../types';
 
 const API_CONFIG = {
-  // Change this to your actual API endpoint
-  baseUrl: 'http://localhost:8000', // Your Flask/FastAPI server
+  // Use Vite environment variable when available so frontend is dynamic
+  // If VITE_API_URL is not set, fall back to localhost for development
+  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000', // Your Flask/FastAPI server
   endpoints: {
     analyze: '/analyze',
     health: '/health'

@@ -49,6 +49,9 @@ interface CounterfactualAnalysisProps {
   imageData: File;
 }
 
+// Use Vite env var for API URL so frontend can point to different backends without code changes
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 const CounterfactualAnalysis: React.FC<CounterfactualAnalysisProps> = ({ imageData }) => {
   const [results, setResults] = useState<CounterfactualResults | null>(null);
   const [loading, setLoading] = useState(false);
@@ -94,7 +97,7 @@ const CounterfactualAnalysis: React.FC<CounterfactualAnalysisProps> = ({ imageDa
     setResults(null);
 
     try {
-      const response = await fetch('http://localhost:8000/counterfactual', {
+      const response = await fetch(`${API}/counterfactual`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
