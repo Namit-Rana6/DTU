@@ -35,8 +35,14 @@ from counterfactual_explainer import CounterfactualExplainer, create_counterfact
 
 app = Flask(__name__)
 CORS(app, resources={
-    r"/*": {"origins": ["https://dtu-1.onrender.com"]}
+    r"/*": {
+        "origins": ["https://dtu-1.onrender.com", "http://dtu-1.onrender.com"],
+        "methods": ["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
 })
+
+
 
 # Define MODEL_CONFIG first
 MODEL_CONFIG = {
@@ -63,6 +69,12 @@ transform = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # ImageNet normalization
 ])
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add("Access-Control-Allow-Origin", "https://dtu-1.onrender.com")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+    return response
 
 def load_model():
     global model, shap_explainer, counterfactual_explainer
