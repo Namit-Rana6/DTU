@@ -34,7 +34,6 @@ from counterfactual_explainer import CounterfactualExplainer, create_counterfact
 
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for frontend requests
 CORS(app, resources={
     r"/*": {"origins": ["https://dtu-1.onrender.com"]}
 })
