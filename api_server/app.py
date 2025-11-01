@@ -415,19 +415,30 @@ def model_info():
     })
 
 if __name__ == '__main__':
-    print("Starting Fracture Detection API Server...")
-    print(f"Device: {device}")
-    if load_model():
-        print("Model loaded successfully!")
-        print(f"Server starting on http://localhost:8000")
-        print("\nAPI Endpoints:")
-        print("- POST /analyze - Analyze X-ray image")
-        print("- POST /counterfactual - Generate counterfactual explanations")
-        print("- GET /health - Health check")
-        print("- GET /model-info - Model information")
-        print("\nMake sure to place your 'best.pth' file in this directory!")
-        port = int(os.environ.get('PORT', 10000))
-        app.run(host='0.0.0.0', port=port)
+    print("🚀 Starting Fracture Detection API Server...")
+    print(f"[INFO] Device: {device}")
+    print("[INFO] Booting model during startup...")
 
-    else:
-        print("Failed to load model. Please check your model file and try again.")
+    try:
+        # Try to load the model immediately at startup
+        success = load_model()
+        if success:
+            print("✅ Model loaded successfully at startup!")
+        else:
+            print("❌ Model failed to load — check model path or weights file.")
+            exit(1)  # Stop server if model isn't available
+
+    except Exception as e:
+        print(f"🔥 Model loading failed at startup: {str(e)}")
+        exit(1)
+
+    # After model is loaded, start Flask
+    port = int(os.environ.get('PORT', 10000))
+    print(f"🌐 Server starting on http://0.0.0.0:{port}")
+    print("Available endpoints:")
+    print(" - POST /analyze")
+    print(" - POST /counterfactual")
+    print(" - GET  /health")
+    print(" - GET  /model-info")
+    app.run(host='0.0.0.0', port=port)
+
