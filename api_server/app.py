@@ -36,12 +36,20 @@ from counterfactual_explainer import CounterfactualExplainer, create_counterfact
 app = Flask(__name__)
 CORS(app)  # Enable CORS for frontend requests
 
+# Define MODEL_CONFIG first
 MODEL_CONFIG = {
     'num_classes': 2,
     'class_names': ['normal', 'fracture'],
     'input_size': 224,
-    'model_path': 'best.pth'  # <-- Use just the filename if the model is in the same directory as app.py
+    'model_path': 'best.pth'  # placeholder, will be overwritten below
 }
+
+# Dynamically set absolute model path (handles deployment correctly)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_CONFIG['model_path'] = os.path.join(BASE_DIR, '..', 'best.pth')
+MODEL_CONFIG['model_path'] = os.path.abspath(MODEL_CONFIG['model_path'])
+
+print(f"[INFO] Looking for model at: {MODEL_CONFIG['model_path']}")
 
 model = None
 shap_explainer = None
