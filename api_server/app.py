@@ -51,16 +51,20 @@ def health():
     return jsonify({"status": "ok"}), 200
 
 # Define MODEL_CONFIG first
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "best.pth")
+
 MODEL_CONFIG = {
     'num_classes': 2,
     'class_names': ['normal', 'fracture'],
     'input_size': 224,
-    'model_path': 'best.pth'  # model in same directory as app.py
+    'model_path': MODEL_PATH
 }
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_CONFIG['model_path'] = os.path.join(BASE_DIR, 'best.pth')
+print(f"[INFO] Looking for model at: {MODEL_PATH}")
+print(f"[INFO] Exists: {os.path.exists(MODEL_PATH)}")
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"[INFO] Looking for model at: {MODEL_CONFIG['model_path']}")
 
 model = None
