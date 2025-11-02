@@ -83,49 +83,65 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # ImageNet normalization
 ])
 
-
 def load_model():
+    """Load the DenseNet121 model safely, handling all checkpoint types."""
     global model, shap_explainer, counterfactual_explainer
-    if not os.path.exists(MODEL_CONFIG['model_path']):
-        raise FileNotFoundError(f"Model file not found: {MODEL_CONFIG['model_path']}")
+    model_path = MODEL_CONFIG['model_path']
+
+    print(f"[INFO] Attempting to load model from: {model_path}")
+    if not os.path.exists(model_path):
+        print(f"[❌] Model file not found at {model_path}")
+        return False
+
     try:
-        # Build model exactly as you trained it
+        # Build architecture
         model = models.densenet121(weights=None)
         num_features = model.classifier.in_features
         model.classifier = nn.Linear(num_features, MODEL_CONFIG['num_classes'])
-        checkpoint = torch.load(MODEL_CONFIG['model_path'], map_location=device)
-        model.load_state_dict(checkpoint)
+
+        checkpoint = torch.load(model_path, map_location=device)
+
+        # --- handle all possible save formats ---
+        if isinstance(checkpoint, dict) and 'state_dict' in checkpoint:
+            print("[DEBUG] Detected checkpoint with 'state_dict' key")
+            model.load_state_dict(checkpoint['state_dict'])
+        elif isinstance(checkpoint, dict):
+            print("[DEBUG] Detected plain state_dict checkpoint")
+            model.load_state_dict(checkpoint)
+        else:
+            print("[DEBUG] Detected full model object — using directly")
+            model = checkpoint
+
         model.to(device)
         model.eval()
-        
-        # Initialize SHAP explainer
-        print("Initializing SHAP explainer...")
+        print(f"[✅] Model loaded successfully on {device}")
+
+        # --- optional explainers initialization ---
         try:
-            # For PyTorch models, use GradientExplainer instead of DeepExplainer
-            # to avoid TensorFlow dependency issues
+            print("[INFO] Initializing SHAP explainer...")
             background_data = torch.randn(5, 3, MODEL_CONFIG['input_size'], MODEL_CONFIG['input_size']).to(device)
-            
-            # Use GradientExplainer which works better with PyTorch
             shap_explainer = shap.GradientExplainer(model, background_data)
-            print("SHAP explainer initialized successfully")
-        except Exception as shap_error:
-            print(f"Warning: Failed to initialize SHAP explainer: {shap_error}")
+            print("[✅] SHAP explainer ready.")
+        except Exception as shap_err:
+            print(f"[⚠️] Failed to initialize SHAP explainer: {shap_err}")
             shap_explainer = None
-        
-        # Initialize Counterfactual explainer
-        print("Initializing Counterfactual explainer...")
+
         try:
+            print("[INFO] Initializing Counterfactual explainer...")
             counterfactual_explainer = CounterfactualExplainer(model, device, MODEL_CONFIG['input_size'])
-            print("Counterfactual explainer initialized successfully")
-        except Exception as cf_error:
-            print(f"Warning: Failed to initialize Counterfactual explainer: {cf_error}")
+            print("[✅] Counterfactual explainer ready.")
+        except Exception as cf_err:
+            print(f"[⚠️] Failed to initialize Counterfactual explainer: {cf_err}")
             counterfactual_explainer = None
-        
-        print(f"Model loaded successfully on {device}")
+
         return True
+
     except Exception as e:
-        print(f"Error loading model: {str(e)}")
+        print(f"[🔥] Error loading model: {e}")
+        import traceback
+        print(traceback.format_exc())
         return False
+
 
 def preprocess_image(image_data):
     """Preprocess base64 image for model input"""
