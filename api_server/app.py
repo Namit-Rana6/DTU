@@ -429,6 +429,18 @@ def model_info():
             '/model-info': 'Model information'
         }
     })
+print("🚀 Starting Fracture Detection API Server...")
+print(f"[INFO] Device: {device}")
+print("[INFO] Booting model during startup...")
+
+try:
+    success = load_model()
+    if success:
+        print("✅ Model loaded successfully at startup!")
+    else:
+        print("❌ Model failed to load — check model path or weights file.")
+except Exception as e:
+    print(f"🔥 Model loading failed at startup: {str(e)}")
 
 if __name__ == '__main__':
     print("🚀 Starting Fracture Detection API Server...")
